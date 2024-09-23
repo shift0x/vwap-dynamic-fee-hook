@@ -1,1 +1,1 @@
-# vwap-dynamic-fee-hook
+# VWAP Dynamic Fee Hook
