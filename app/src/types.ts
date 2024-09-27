@@ -3,6 +3,7 @@ import { ethers } from "ethers"
 export type AppConfig = {
     vwapDuration: number,
     maxSwaps: number,
+    prover: string,
     chains: ChainConfig[]
 }
 

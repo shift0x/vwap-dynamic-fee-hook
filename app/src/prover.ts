@@ -15,6 +15,7 @@ function createDatasetFrom(swaps : Swap[]) : Swap[] {
     return sortedSwaps.splice(0, config.maxSwaps)
 }
 
+/*
 async function getTransactionReceipts(swaps: Swap[]) : Promise<TransactionReceiptWithChain[]> {
     console.log(`processing swaps: ${swaps.length}`)
     // Transactions receipts may have multiple matching swaps. So, we need to deduplicate while preserving
@@ -40,6 +41,7 @@ async function getTransactionReceipts(swaps: Swap[]) : Promise<TransactionReceip
 
     return receipts
 }
+*/
 
 export const prove = async (swaps : Swap[]) => {
     const dataset = createDatasetFrom(swaps);
@@ -72,6 +74,10 @@ export const prove = async (swaps : Swap[]) => {
         }))
     })
 
-    console.log(proofRequest);
+    const prover = new Prover(config.prover);
+
+    const response = await prover.prove(proofRequest)
+
+    console.log({response});
 
 }
