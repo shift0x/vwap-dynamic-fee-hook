@@ -1,45 +1,57 @@
 import { ethers } from 'ethers';
-import config from '../config.json'
 import { ChainConfig, Swap } from './types';
-import { discoverLiquidityPoolsWithTokens } from './contracts/liquidityPoolInspector';
+import { getLiquidityPools } from './contracts/liquidityPoolInspector';
+import { config } from '../app.config';
 
 const SWAP_TOPICS = [
     "0x19b47279256b2a23a1665c810c8d55a1758940ee09377d4f8d26497a3577dc83",
     "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67"
 ]
 
-async function filterTransactionLogsForPoolsContainingTokens(
+async function buildSwapEvents (
     provider: ethers.JsonRpcProvider, 
-    tokenA : string, 
-    tokenB: string, 
+    chain: ChainConfig,
+    currentBlockNumber: number,
     logs : ethers.Log[]
-) : Promise<ethers.Log[]> {
+) : Promise<Swap[]> {
     if(logs.length == 0) { return []; }
 
     const logsByPool: Map<string, ethers.Log[]> = new Map();
 
     logs.forEach(log => {
-        if(!logsByPool.has(log.address)) {
-            logsByPool.set(log.address, []);
+        const addr = log.address.toLowerCase();
+
+        if(!logsByPool.has(addr)) {
+            logsByPool.set(addr, []);
         }
 
-        logsByPool.get(log.address)?.push(log);
+        logsByPool.get(addr)?.push(log);
     });
 
-    const allLiquidityPools = logs
-        .map(log => { return log.address})
-        .filter((val, index, self) => { return self.indexOf(val) === index });
 
+    const liquidityPools = await getLiquidityPools(provider, Array.from(logsByPool.keys()));
 
-    const liquidityPoolsWithTokens = await discoverLiquidityPoolsWithTokens(provider, tokenA, tokenB, allLiquidityPools);
+    const matchingPools = liquidityPools.filter(pool => { return pool.canSwap(chain.baseTokenAddress, chain.quoteTokenAddress) })
+    const swaps = matchingPools
+        .map(pool => {
+            const poolLogs = logsByPool.get(pool.address);
+            const swaps = poolLogs?.map(log => {
+                const amounts = pool.getSwamAmountsFrom(log, chain.baseTokenAddress, chain.quoteTokenAddress)
+                const age = (currentBlockNumber - log.blockNumber) * chain.blockTime
 
-    const logsForPoolsWithTokens = liquidityPoolsWithTokens
-        .map(pool => { 
-            return logsByPool.get(pool) 
+                return {
+                    chain,
+                    log,
+                    amounts,
+                    age
+                } as Swap
+            })
+
+            return swaps
         })
-        .flat()
 
-    return logsForPoolsWithTokens as ethers.Log[]
+
+    return swaps.flat() as Swap[]
 }
 
 async function getLogs(
@@ -63,25 +75,16 @@ async function getLogs(
         fromBlockNumber += chain.blockRange;
         toBlockNumber = Math.min(fromBlockNumber+chain.blockRange, currentBlockNumber);
 
-        const matchingLogs = await filterTransactionLogsForPoolsContainingTokens(provider, chain.baseTokenAddress, chain.quoteTokenAddress, logs)
-        const swapEvents = matchingLogs.map(log => {
-            return {
-                chainId: chain.chainId,
-                swap: log,
-                age: (currentBlockNumber - log.blockNumber) * chain.blockTime
-            } as Swap
-        })
+        const swapEvents = await buildSwapEvents(provider, chain, currentBlockNumber, logs)
 
-        if(matchingLogs.length > 0){
-            swaps = swaps.concat(swapEvents)
-        }
+        swaps = swaps.concat(swapEvents)
     }
 
     return swaps;
 }
 
 export const getSwaps = async () => {
-    const chainDataRequests = config.chains.map(chain => { return getLogs(chain as ChainConfig) });
+    const chainDataRequests = config.chains.map(chain => { return getLogs(chain) });
     const swaps = await Promise.all(chainDataRequests)
 
     return swaps.flat()
