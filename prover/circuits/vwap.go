@@ -11,7 +11,7 @@ func NewVwapCircuit() *VwapCircuit {
 }
 
 func (c *VwapCircuit) Allocate() (maxReceipts, maxStorage, maxTransactions int) {
-	return 200, 0, 0
+	return 10, 0, 0
 }
 
 func (c *VwapCircuit) Define(api *sdk.CircuitAPI, in sdk.DataInput) error {

@@ -3,7 +3,7 @@ import { AppConfig } from "./src/types";
 export const config : AppConfig = {
     "vwapDuration": 600,
     "maxSwaps": 10,
-    "prover": "localhost:33247",
+    "prover": "40.90.238.15:33247",
     "chains": [
         {
             "chainId": "1",

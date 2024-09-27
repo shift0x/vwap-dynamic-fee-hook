@@ -76,6 +76,8 @@ export const prove = async (swaps : Swap[]) => {
 
     const prover = new Prover(config.prover);
 
+    console.log(`sending proof request`)
+
     const response = await prover.prove(proofRequest)
 
     console.log({response});
