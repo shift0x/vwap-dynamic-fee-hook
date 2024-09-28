@@ -1,14 +1,16 @@
 [Unit]
 Description=VWAP Dynamic Fee Prover
-After=network-online.target
+After=syslog.target network.target
 
 [Service]
-Environment=HOME=/home/ubuntu
-ExecStart=/home/ubuntu/go/bin/prover -port=33248
+Type=simple
 Restart=always
-RestartSec=3
-LimitNOFILE=4096
-MemoryMax=16G
+RestartSec=10s
+User=ubuntu
+KillMode=process
+KillSignal=SIGINT
+TimeoutStopSec=90
+ExecStart=/home/ubuntu/go/bin/prover -port=33248
 
 [Install]
 WantedBy=multi-user.target
