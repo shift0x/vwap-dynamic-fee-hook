@@ -24,9 +24,24 @@ func Test_Circuit(t *testing.T) {
 	amount0Hex := common.HexToHash(hexutil.EncodeBig(amount0))
 	amount1Hex := common.HexToHash(hexutil.EncodeBig(amount1))
 
+	txHash := common.HexToHash("53b37ec7975d217295f4bdadf8043b261fc49dccc16da9b9fc8b9530845a5794")
+
+	app.AddTransaction(sdk.TransactionData{
+		Hash:                txHash,
+		ChainId:             big.NewInt(1),
+		BlockNum:            big.NewInt(20850020),
+		Nonce:               250,
+		GasTipCapOrGasPrice: common.Big0,
+		GasFeeCap:           common.Big0,
+		Value:               common.Big0,
+		From:                common.Address{},
+		To:                  common.Address{},
+		GasLimit:            50000,
+	})
+
 	app.AddReceipt(sdk.ReceiptData{
 		BlockNum: big.NewInt(18064070),
-		TxHash:   common.HexToHash("53b37ec7975d217295f4bdadf8043b261fc49dccc16da9b9fc8b9530845a5794"),
+		TxHash:   txHash,
 		Fields: [sdk.NumMaxLogFields]sdk.LogFieldData{
 			{
 				Contract:   pool,
@@ -76,6 +91,21 @@ func TestE2E(t *testing.T) {
 
 	amount0Hex := common.HexToHash(hexutil.EncodeBig(amount0))
 	amount1Hex := common.HexToHash(hexutil.EncodeBig(amount1))
+
+	txHash := common.HexToHash("53b37ec7975d217295f4bdadf8043b261fc49dccc16da9b9fc8b9530845a5794")
+
+	app.AddTransaction(sdk.TransactionData{
+		Hash:                txHash,
+		ChainId:             big.NewInt(1),
+		BlockNum:            big.NewInt(20850020),
+		Nonce:               250,
+		GasTipCapOrGasPrice: common.Big0,
+		GasFeeCap:           common.Big0,
+		Value:               common.Big0,
+		From:                common.Address{},
+		To:                  common.Address{},
+		GasLimit:            50000,
+	})
 
 	app.AddReceipt(sdk.ReceiptData{
 		BlockNum: big.NewInt(18064070),
