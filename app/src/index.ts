@@ -1,7 +1,6 @@
-import { submit } from "./brevis";
 import { getSwaps } from "./chain";
 import { validateConfiguration } from "./config";
-import { prove } from "./prover";
+import { proveAndSubmit } from "./prover";
 
 async function main(){
     const ok = await validateConfiguration();
@@ -11,9 +10,8 @@ async function main(){
     }
 
     const swaps = await getSwaps();
-    const proof = await prove(swaps);
-
-    await submit();
+    
+    await proveAndSubmit(swaps);
 }
 
 main();

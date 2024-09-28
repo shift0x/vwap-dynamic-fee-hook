@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
 import { config } from "../app.config";
-import { ChainConfig, Swap, TransactionReceiptWithChain } from "./types";
-import { Field, ProofRequest, Prover, ReceiptData } from "brevis-sdk-typescript";
+import { Swap } from "./types";
+import { Field, ProofRequest, Prover, ReceiptData, TransactionData } from "brevis-sdk-typescript";
+import { submitProof } from "./brevis";
 
 function createDatasetFrom(swaps : Swap[]) : Swap[] {
     if(swaps.length <= config.maxSwaps) {
@@ -15,43 +16,51 @@ function createDatasetFrom(swaps : Swap[]) : Swap[] {
     return sortedSwaps.splice(0, config.maxSwaps)
 }
 
-/*
-async function getTransactionReceipts(swaps: Swap[]) : Promise<TransactionReceiptWithChain[]> {
-    console.log(`processing swaps: ${swaps.length}`)
-    // Transactions receipts may have multiple matching swaps. So, we need to deduplicate while preserving
-    // chain information to reduce the number of calls we make to rpcs
-    const txsToProcess: Map<string, Swap> = new Map();
 
-    swaps.forEach(swap => {
-        txsToProcess.set(swap.log.transactionHash, swap)
-    })
-
-    const receipts : TransactionReceiptWithChain[] = []
-
-    const txs = Array.from(txsToProcess.keys())
-
-    for(var i =0; i < txs.length; i++) {
-        const txHash = txs[i];
-        const swap = txsToProcess.get(txHash)
-        const provider = new ethers.JsonRpcProvider(swap?.chain.rpc)
-        const receipt = await provider.getTransactionReceipt(txHash) as ethers.TransactionReceipt
-
-        receipts.push({ receipt, chain: swap?.chain as ChainConfig})
-    }
-
-    return receipts
-}
-*/
-
-export const prove = async (swaps : Swap[]) => {
+export const proveAndSubmit = async (swaps : Swap[]) => {
     const dataset = createDatasetFrom(swaps);
-    const proofRequest = new ProofRequest()
+    const proofsByChain : Map<string, ProofRequest> = new Map();
 
-    dataset.forEach(swap => {
-        proofRequest.addReceipt(new ReceiptData({
+    for(var i = 0 ; i < dataset.length; i++){
+        const swap = dataset[i];
+
+        if(!proofsByChain.has(swap.chain.chainId)) {
+            const request = new ProofRequest()
+            const provider = new ethers.JsonRpcProvider(swap.chain.rpc);
+
+            const tx = (await provider.getTransaction(swap.log.transactionHash)) as ethers.TransactionResponse
+            const receipt = (await provider.getTransactionReceipt(swap.log.transactionHash)) as ethers.TransactionReceipt
+
+            var gas_tip_cap_or_gas_price =  ''
+            var gas_fee_cap = ''
+
+            if (tx.type == 0) {
+                gas_tip_cap_or_gas_price = tx.gasPrice.toString() ?? ''
+                gas_fee_cap = '0'
+            } else {
+                gas_tip_cap_or_gas_price = tx.maxPriorityFeePerGas?.toString() ?? ''
+                gas_fee_cap = tx.maxFeePerGas?.toString() ?? ''
+            }
+
+            request.addTransaction(new TransactionData({
+                hash: tx.hash,
+                chain_id: Number(tx.chainId.toString()),
+                block_num: Number(receipt.blockNumber),
+                nonce: tx.nonce,
+                gas_tip_cap_or_gas_price,
+                gas_fee_cap,
+                gas_limit: Number(tx.gasLimit.toString()),
+                from: tx.from,
+                to: tx.to as string,
+                value: tx.value.toString()
+            }))
+
+            proofsByChain.set(swap.chain.chainId, request)
+        }
+
+        proofsByChain.get(swap.chain.chainId)?.addReceipt(new ReceiptData({
             block_num: swap.log.blockNumber,
             tx_hash: swap.log.transactionHash,
-
             fields: [
                 new Field({ 
                     contract: swap.log.address,
@@ -71,15 +80,18 @@ export const prove = async (swaps : Swap[]) => {
                     value: swap.amounts.quoteAmount,
                 })
             ]
-        }))
-    })
+        }));
+    }
 
     const prover = new Prover(config.prover);
+    const chainIds = Array.from(proofsByChain.keys())
 
-    console.log(`sending proof request`)
+    for(var i = 0; i < chainIds.length; i++){
+        const chainId = chainIds[i];
+        const proofRequest = proofsByChain.get(chainId) as ProofRequest;
 
-    const response = await prover.prove(proofRequest)
+        const proofResponse = await prover.prove(proofRequest);
 
-    console.log({response});
-
+        await submitProof(Number(chainId), proofRequest, proofResponse)
+    }
 }

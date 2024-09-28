@@ -30,10 +30,6 @@ export type SwapAmount = {
     quoteAmountIndex: number
 }
 
-export type TransactionReceiptWithChain = {
-    chain: ChainConfig,
-    receipt: ethers.TransactionReceipt
-}
 
 export class V3LiquidityPool {
     public address: string;
