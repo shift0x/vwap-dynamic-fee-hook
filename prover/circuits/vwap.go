@@ -34,13 +34,6 @@ func (c *VwapCircuit) Define(api *sdk.CircuitAPI, in sdk.DataInput) error {
 	// positive before they are summed.
 	receipts := sdk.NewDataStream(api, in.Receipts)
 
-	// This circuit is meant to operate on receipts from arbitrary chains. As such, we don't
-	// have a clean way to do exectations on receipt addresses since we don't know which chain we are dealing
-	// with when we are processing a receipt. As such, we have to depend on the sender to pass
-	// the correct set of receipts.
-
-	// sdk.AssertEach(...)
-
 	baseTokenVolume := c.getVolume(api, receipts, 0)
 	quoteTokenVolume := c.getVolume(api, receipts, 1)
 
