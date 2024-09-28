@@ -8,7 +8,7 @@ contract LiquidityPoolInspector {
     struct InspectionResult {
         address pool;
         address token0;
-        address token1;
+        address token1; 
     }
 
     function getPoolToken(

@@ -13,7 +13,7 @@ struct ChainInfo {
     uint256 expiresAt;
 }
 
-contract VwapHook is BrevisApp, Ownable {
+contract BrevisSwapVolumeProcessor is BrevisApp, Ownable {
 
     event SwapVolumeAttested(uint256 indexed chainId, uint256 baseVolume, uint256 quoteVolume);
 
@@ -35,6 +35,8 @@ contract VwapHook is BrevisApp, Ownable {
         quoteTokenScalingFactor = 10**(18-IERC20Metadata(_quoteToken).decimals());
     }
 
+    // calculate vwap using submitted base and quote volumes across cross chain defi ecosystem
+    // ignores submissions that have passed their timeout
     function vwap() public view returns (bool, uint256) {
         uint256 baseVolume;
         uint256 quoteVolume;
