@@ -2,6 +2,7 @@
 pragma solidity ^0.8.27;
 
 import './lib/BrevisApp.sol';
+import './interfaces/IVwapRateProvider.sol';
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -13,9 +14,12 @@ struct ChainInfo {
     uint256 expiresAt;
 }
 
-contract BrevisSwapVolumeProcessor is BrevisApp, Ownable {
+contract BrevisVwapRateProvider is IVwapRateProvider, BrevisApp, Ownable {
 
     event SwapVolumeAttested(uint256 indexed chainId, uint256 baseVolume, uint256 quoteVolume);
+
+    address immutable baseToken;
+    address immutable quoteToken;
 
     uint256 immutable baseTokenScalingFactor;
     uint256 immutable quoteTokenScalingFactor;
@@ -31,6 +35,9 @@ contract BrevisSwapVolumeProcessor is BrevisApp, Ownable {
         address _baseToken, 
         address _quoteToken
     ) BrevisApp(brevisRequest) Ownable(msg.sender) {
+        baseToken = _baseToken;
+        quoteToken = _quoteToken;
+
         baseTokenScalingFactor = 10**(18-IERC20Metadata(_baseToken).decimals());
         quoteTokenScalingFactor = 10**(18-IERC20Metadata(_quoteToken).decimals());
     }
