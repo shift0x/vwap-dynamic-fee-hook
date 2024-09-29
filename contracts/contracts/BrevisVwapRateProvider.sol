@@ -31,10 +31,11 @@ contract BrevisVwapRateProvider is IVwapRateProvider, BrevisApp, Ownable {
     mapping(uint256 => ChainInfo) public chainData;
 
     constructor(
-        address brevisRequest, 
+        address _admin,
+        address _brevisRequestContract, 
         address _baseToken, 
         address _quoteToken
-    ) BrevisApp(brevisRequest) Ownable(msg.sender) {
+    ) BrevisApp(_brevisRequestContract) Ownable(_admin) {
         baseToken = _baseToken;
         quoteToken = _quoteToken;
 
@@ -65,9 +66,9 @@ contract BrevisVwapRateProvider is IVwapRateProvider, BrevisApp, Ownable {
             return (false, 0);
         }
 
-        uint256 price = Math.mulDiv(baseVolume, 1e18, quoteVolume);
+        uint256 _vwap = Math.mulDiv(quoteVolume, 1e18, baseVolume);
 
-        return (true, price);
+        return (true, _vwap);
     }
 
     // BrevisRequest contract will trigger callback once ZK proof is received.
@@ -83,7 +84,7 @@ contract BrevisVwapRateProvider is IVwapRateProvider, BrevisApp, Ownable {
         
         emit SwapVolumeAttested(chainId, baseVolume, quoteVolume);
 
-        chainData[chainId] = ChainInfo(baseVolume, quoteVolume, block.timestamp);
+        chainData[chainId] = ChainInfo(baseVolume, quoteVolume, block.timestamp + timeout);
     }
 
     // In app circuit we have:
@@ -118,5 +119,12 @@ contract BrevisVwapRateProvider is IVwapRateProvider, BrevisApp, Ownable {
         bytes32 _vkHash
     ) external onlyOwner {
         vkHash = _vkHash;
+    }
+
+    // timeout represents how long the volume data will be valid before it is considered stale
+    function setTimeout(
+        uint256 _timeout
+    ) external onlyOwner {
+        timeout = _timeout;
     }
 }
