@@ -35,7 +35,7 @@ contract VwapDynamicFeeHook is CLBaseHook {
         return _hooksRegistrationBitmapFrom(
             Permissions({
                 beforeInitialize: false,
-                afterInitialize: false,
+                afterInitialize: true,
                 beforeAddLiquidity: false,
                 afterAddLiquidity: false,
                 beforeRemoveLiquidity: false,
@@ -71,7 +71,7 @@ contract VwapDynamicFeeHook is CLBaseHook {
 
         // Create a new rate provider contract to store vwap info for the given pool
         BrevisVwapRateProvider vwapRateProvider = 
-            new BrevisVwapRateProvider(brevisRequestContract, hookArgs.baseToken, hookArgs.quoteToken);
+            new BrevisVwapRateProvider(hookArgs.admin, brevisRequestContract, hookArgs.baseToken, hookArgs.quoteToken);
 
         emit VwapRateProviderCreated(poolId, address(vwapRateProvider));
         
