@@ -115,7 +115,7 @@ contract VwapDynamicFeeHook is CLBaseHook {
 
         fee += getVolatilityFee(key, params, info, vwap);
         
-        return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+        return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee);
     }
 
     /// @notice Determines the appropiate volatility fee based on market and pool conditions
