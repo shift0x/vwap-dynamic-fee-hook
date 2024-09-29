@@ -19,7 +19,7 @@ function createDatasetFrom(swaps : Swap[]) : Swap[] {
 
 export const proveAndSubmit = async (swaps : Swap[]) => {
     const dataset = createDatasetFrom(swaps);
-    const proofsByChain : Map<string, ProofRequest> = new Map();
+    const proofsByChain : Map<number, ProofRequest> = new Map();
 
     for(var i = 0 ; i < dataset.length; i++){
         const swap = dataset[i];

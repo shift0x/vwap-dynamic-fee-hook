@@ -1,14 +1,23 @@
 import { ethers } from "ethers"
 
+export type VWAPDestination = {
+    chainId: number,
+    address: string,
+    brevisRequestContract: string,
+    rpc: string,
+    wallet: string,
+}
+
 export type AppConfig = {
     vwapDuration: number,
     maxSwaps: number,
     prover: string,
-    chains: ChainConfig[]
+    chains: ChainConfig[],
+    destination: VWAPDestination,
 }
 
 export type ChainConfig = {
-    chainId: string,
+    chainId: number,
     baseTokenAddress: string,
     quoteTokenAddress: string,
     rpc: string,
