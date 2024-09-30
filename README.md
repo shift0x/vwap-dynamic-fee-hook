@@ -12,7 +12,7 @@ This hook uses dynamic swap fees to create a positive feedback loop in which Liq
 
 # Running the application
 
-The main entry point for the application is the nodejs app which pulls matching transaction logs from configured chains. These logs are then submitted to the prover, the generated proof is then submitted to brevis and data is persisted within the smart contract on the destination chain. 
+The main entry point for the application is the nodejs app which pulls matching swap transaction logs from uniswap-v3 like pools for configured pools and chains. These logs are then submitted to the prover, which aggregated transaction volumes and generates a proof to submit to brevis. Once submitted, brevis will call the configured smart contract to persist base and quote swap volumes on the destination chain. 
 
 To setup this flow, follow the steps below:
 
@@ -31,13 +31,25 @@ In this method, the hook will determine what fee to charge for the incoming swap
 The vwap is retrived from the registerd `BrevisVwapRateProvider` for the given `PoolId`.
 
 
-## 2. Setup the prover
+## 3. Setup the prover
 The prover is responsible for processing transaction receipts, aggregating volume amounts and creating the proof to submit to brevis.
 
-To install the prover on a linux server:
+To install the prover on a linux server and run with systemd:
 
 ```shell
 make deploy-prover
+```
+
+To stop the running prover
+
+```shell
+systemctl stop vwap-dynamic-fee-prover
+```
+
+To restart the prover
+
+```shell
+systemctl restart vwap-dynamic-fee-prover
 ```
 
 To run the prover from the command line:
