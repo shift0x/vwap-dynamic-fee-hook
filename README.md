@@ -51,7 +51,20 @@ struct DynamicFeeHookArgs {
 ```
 
 ### After pool deployment
-Post pool deployment, the admin will need to configure the rate provider using the following functions. You can get the rate provider address using the following property on the hook contract
+Post pool deployment, the admin will need to configure the rate provider using the following functions. 
+
+``` solidity
+    // chains which we will consider for vwap computations
+    function setChains(uint256[] calldata _chains);
+
+    // timeout represents how long the volume data will be valid before it is considered stale
+    function setTimeout(uint256 _timeout);
+
+    // vkHash represents the unique circuit app logic
+    function setVkHash(bytes32 _vkHash);
+```
+
+You can get the rate provider address using the following property on the hook contract
 
 ``` solidity
     struct PoolInfo {
@@ -63,17 +76,6 @@ Post pool deployment, the admin will need to configure the rate provider using t
     }
 
     mapping(PoolId => PoolInfo) public pools;
-```
-
-``` solidity
-    // chains which we will consider for vwap computations
-    function setChains(uint256[] calldata _chains);
-
-    // timeout represents how long the volume data will be valid before it is considered stale
-    function setTimeout(uint256 _timeout);
-
-    // vkHash represents the unique circuit app logic
-    function setVkHash(bytes32 _vkHash);
 ```
 
 
