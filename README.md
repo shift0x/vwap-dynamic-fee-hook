@@ -136,7 +136,7 @@ Open the file `app/app.config.ts` and edit the following configurations as desir
         // rpc address
         "rpc": "https://rpc.sepolia.org",
 
-        // wallet seed phrase for sending txs
+        // private key for sending txs
         "wallet": process.env.ETH_SEPOLIA_WALLET as string,
     },
 
