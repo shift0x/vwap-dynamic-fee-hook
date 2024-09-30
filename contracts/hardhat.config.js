@@ -7,5 +7,11 @@ module.exports = {
     settings: {
       evmVersion: "cancun"
     }
+  },
+  networks: {
+    sepolia: {
+      url: "https://rpc.sepolia.org",
+      accounts: [ vars.get("SMART_CONTRACT_DEPLOYER") ],
+    }
   }
 };

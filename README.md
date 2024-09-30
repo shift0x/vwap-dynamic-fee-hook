@@ -16,7 +16,11 @@ The main entry point for the application is the nodejs app which pulls matching 
 To setup this flow, follow the steps below:
 
 ## 1. Deploy the hook contract
-The hook smart contract registers an onBeforeSwap and onAfterInitalize hook methods in order to process dynamic transaction fees.
+The hook smart contract registers an onBeforeSwap and onAfterInitalize hook methods in order to process dynamic transaction fees. To deploy the hook, setup the account in `contracts/hardhat.config.js` then run the following command from `/contracts`
+
+``` shell
+npx hardhat run ./scripts/deployVwapDynamicFeeHook.js --network sepolia
+```
 
 ### onAfterInitalize
 In this method, the hook registers the newly created pool with the hook and creates a new `BrevisVwapRateProvider` contract to processes brevis proofs and compute vwaps when requested.
@@ -51,7 +55,7 @@ struct DynamicFeeHookArgs {
 ```
 
 ### After pool deployment
-Post pool deployment, the admin will need to configure the `BrevisVwapRateProvider` using the following functions. 
+Post pool deployment, the admin can to configure the `BrevisVwapRateProvider` using the following functions. 
 
 ``` solidity
     // chains which we will consider for vwap computations
@@ -80,12 +84,14 @@ You can get the rate provider address using the following property on the hook c
 
 
 ## 3. Setup the prover
-The prover is responsible for processing transaction receipts, aggregating volume amounts and creating the proof to submit to brevis.
+The prover is responsible for processing transaction logs, aggregating volume amounts and creating the proof to submit to brevis.
+
+run the following command from `/prover`
 
 To install the prover on a linux server and run with systemd:
 
 ```shell
-make deploy-prover
+make deploy
 ```
 
 To stop the running prover
@@ -103,7 +109,7 @@ systemctl restart vwap-dynamic-fee-prover
 To run the prover from the command line (non systemd):
 
 ```shell
-make run-prover
+make start
 ```
 
 ## 4. Configure the app
@@ -167,8 +173,10 @@ Open the file `app/app.config.ts` and edit the following configurations as desir
 ```
 
 ## 5. Run the app
+From `/app` run
+
 ``` shell
-make run-app
+npm start
 ```
 
 
