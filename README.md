@@ -107,7 +107,7 @@ make run-prover
 ```
 
 ## 4. Configure the app
-Open the file `app/app.config.ts` and edit the following configurations as needed. The application supports an arbitrary number of chains to aggregate swaps from, but consult with the brevis team to ensure the source/target chainId mappings have been implemented in the system.
+Open the file `app/app.config.ts` and edit the following configurations as desired. The application supports an arbitrary number of chains to aggregate swaps from, but consult with the brevis team to ensure the source/target chainId mappings have been implemented in the system.
 
 ``` javascript
 {
@@ -127,13 +127,13 @@ Open the file `app/app.config.ts` and edit the following configurations as neede
         // target chain
         "chainId": 11155111, // sepolia
 
-        // contract responsible for processing proofs
+        // rate provider contract, created during pool initalization
         "address": "<RATE_PROVIDER_ADDRESS>",
 
         // brevis contract address
         "brevisRequestContract": "0x841ce48F9446C8E281D3F1444cB859b4A6D0738C",
 
-        // desired rpc
+        // rpc address
         "rpc": "https://rpc.sepolia.org",
 
         // wallet seed phrase for sending txs
@@ -152,7 +152,7 @@ Open the file `app/app.config.ts` and edit the following configurations as neede
             // token address of quote token
             "quoteTokenAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
 
-            // desired rpc
+            // rpc address
             "rpc": process.env.ETH_RPC_URL as string,
 
             // block time of the chain
@@ -164,6 +164,11 @@ Open the file `app/app.config.ts` and edit the following configurations as neede
         ..
     ]
 }
+```
+
+## 5. Run the app
+``` shell
+make run-app
 ```
 
 
