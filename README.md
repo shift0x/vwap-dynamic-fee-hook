@@ -11,13 +11,11 @@ This hook uses dynamic swap fees to create a positive feedback loop in which Liq
 6. More fees = more cake burned
 
 # Running the application
-
 The main entry point for the application is the nodejs app which pulls matching swap transaction logs from uniswap-v3 like pools for configured pools and chains. These logs are then submitted to the prover, which aggregated transaction volumes and generates a proof to submit to brevis. Once submitted, brevis will call the configured smart contract to persist base and quote swap volumes on the destination chain. 
 
 To setup this flow, follow the steps below:
 
 ## 1. Deploy the hook contract
-
 The hook smart contract registers an onBeforeSwap and onAfterInitalize hook methods in order to process dynamic transaction fees.
 
 ### onAfterInitalize
@@ -29,6 +27,39 @@ The hook contract will emit a `VwapRateProviderCreated` event with the PoolId an
 In this method, the hook will determine what fee to charge for the incoming swap. The pool will charge the `baseFee` if the swap will move price closer to the vwap and charge `baseFee + volatilityFee` if the swap will move price away from the vwap.
 
 The vwap is retrived from the registerd `BrevisVwapRateProvider` for the given `PoolId`.
+
+## 2. Deploy a liquidity pool using the hook
+Use the following layout for hook params when deploying a new pool using this hook
+
+``` solidity
+struct DynamicFeeHookArgs {
+    uint24 baseFee;
+    uint24 volatilityFee;
+    address admin;
+    address baseToken;
+    address quoteToken;
+}
+```
+
+**baseFee**: Minimum swap fee to charge on each swap
+**volatilityFee**: Excess fee to charge in addition to the swap fee for swaps that move the price away from te vwap
+**admin**: The administrator for the deployed `BrevisVwapRateProvider` contract
+**baseToken**: Base token for the pair
+**quoteToken**: Quote token for the pair
+
+### After pool deployment
+Post pool deployment, the admin will need to configure the rate provider using the following functions
+
+``` solidity
+    // chains which we will consider for vwap computations
+    function setChains(uint256[] calldata _chains);
+
+    // timeout represents how long the volume data will be valid before it is considered stale
+    function setTimeout(uint256 _timeout);
+
+    // vkHash represents the unique circuit app logic
+    function setVkHash(bytes32 _vkHash);
+```
 
 
 ## 3. Setup the prover
@@ -52,7 +83,7 @@ To restart the prover
 systemctl restart vwap-dynamic-fee-prover
 ```
 
-To run the prover from the command line:
+To run the prover from the command line (non systemd):
 
 ```shell
 make run-prover
