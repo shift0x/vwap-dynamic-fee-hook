@@ -51,7 +51,7 @@ struct DynamicFeeHookArgs {
 ```
 
 ### After pool deployment
-Post pool deployment, the admin will need to configure the rate provider using the following functions. 
+Post pool deployment, the admin will need to configure the `BrevisVwapRateProvider` using the following functions. 
 
 ``` solidity
     // chains which we will consider for vwap computations
@@ -104,6 +104,66 @@ To run the prover from the command line (non systemd):
 
 ```shell
 make run-prover
+```
+
+## 4. Configure the app
+Open the file `app/app.config.ts` and edit the following configurations as needed. The application supports an arbitrary number of chains to aggregate swaps from, but consult with the brevis team to ensure the source/target chainId mappings have been implemented in the system.
+
+``` json
+{
+    // length of the vwap window
+    "vwapDuration": 600,
+
+    // maximum number of swaps to consider. If more swaps are found within the window, 
+    // the latest swaps will be taken
+    "maxSwaps": 250,
+
+    // prover address
+    "prover": "localhost:33247",
+
+    // target chain information for submitting brevis proofs
+    "destination": {
+
+        // target chain
+        "chainId": 11155111, // sepolia
+
+        // contract responsible for processing proofs
+        "address": "<RATE_PROVIDER_ADDRESS>",
+
+        // brevis contract address
+        "brevisRequestContract": "0x841ce48F9446C8E281D3F1444cB859b4A6D0738C",
+
+        // desired rpc
+        "rpc": "https://rpc.sepolia.org",
+
+        // wallet seed phrase for sending txs
+        "wallet": process.env.ETH_SEPOLIA_WALLET as string,
+    },
+
+    // chains which to aggreggate trade volume
+    "chains": [
+        {
+            // target chain Id
+            "chainId": 1,
+
+            // token address of base token
+            "baseTokenAddress": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+
+            // token address of quote token
+            "quoteTokenAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+
+            // desired rpc
+            "rpc": process.env.ETH_RPC_URL as string,
+
+            // block time of the chain
+            "blockTime": 12,
+
+            // maximum block range supported by getLogs on the given rpc
+            "blockRange": 10
+        },
+        ..
+    ]
+}
 ```
 
 

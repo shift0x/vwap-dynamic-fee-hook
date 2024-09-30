@@ -6,7 +6,7 @@ export const config : AppConfig = {
     "prover": "localhost:33247",
     "destination": {
         "chainId": 11155111, // sepolia
-        "address": "<YOUR_HOOK_ADDRESS>",
+        "address": "<RATE_PROVIDER_ADDRESS>",
         "brevisRequestContract": "0x841ce48F9446C8E281D3F1444cB859b4A6D0738C",
         "rpc": "https://rpc.sepolia.org",
         "wallet": process.env.ETH_SEPOLIA_WALLET as string,
