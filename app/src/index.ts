@@ -11,6 +11,8 @@ async function main(){
 
     const swaps = await getSwaps();
     
+    console.log(`>>> found: ${swaps.length} swaps`)
+
     await proveAndSubmit(swaps);
 }
 

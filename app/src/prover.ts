@@ -90,6 +90,8 @@ export const proveAndSubmit = async (swaps : Swap[]) => {
         const chainId = chainIds[i];
         const proofRequest = proofsByChain.get(chainId) as ProofRequest;
 
+        console.log(`>>> [${chainId}] generating proof: ${proofRequest.getReceipts().length} receipts`)
+
         const proofResponse = await prover.prove(proofRequest);
 
         await submitProof(Number(chainId), proofRequest, proofResponse)
