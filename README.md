@@ -109,7 +109,7 @@ make run-prover
 ## 4. Configure the app
 Open the file `app/app.config.ts` and edit the following configurations as needed. The application supports an arbitrary number of chains to aggregate swaps from, but consult with the brevis team to ensure the source/target chainId mappings have been implemented in the system.
 
-``` json
+``` javascript
 {
     // length of the vwap window
     "vwapDuration": 600,
