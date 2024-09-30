@@ -11,8 +11,7 @@ func NewVwapCircuit() *VwapCircuit {
 }
 
 func (c *VwapCircuit) Allocate() (maxReceipts, maxStorage, maxTransactions int) {
-	// This circuit will process a maximum of 100 receipts
-	return 100, 0, 1
+	return 200, 0, 1
 }
 
 func (c *VwapCircuit) getVolume(api *sdk.CircuitAPI, receipts *sdk.DataStream[sdk.Receipt], index uint64) sdk.Uint248 {
