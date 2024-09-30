@@ -11,16 +11,18 @@ This hook uses dynamic swap fees to create a positive feedback loop in which Liq
 6. More fees = more cake burned
 
 # Running the application
-The main entry point for the application is the nodejs app which pulls matching swap transaction logs from uniswap-v3 like pools for configured pools and chains. These logs are then submitted to the prover, which aggregated transaction volumes and generates a proof to submit to brevis. Once submitted, brevis will call the configured smart contract to persist base and quote swap volumes on the destination chain. 
+The main entry point for the application is the nodejs app which pulls matching swap transaction logs from uniswap-v3 like pools for configured pools and chains. These logs are then submitted to the prover, which aggregates base and quote token transaction volumes and generates a proof to submit to brevis. Once submitted, brevis will call the configured smart contract to persist base and quote swap volumes on the destination chain. 
 
 To setup this flow, follow the steps below:
 
 ## 1. Deploy the hook contract
-The hook smart contract registers an onBeforeSwap and onAfterInitalize hook methods in order to process dynamic transaction fees. To deploy the hook, setup the account in `contracts/hardhat.config.js` then run the following command from `/contracts`
+To deploy the hook, setup the deployer account in `contracts/hardhat.config.js` then run the following command from `/contracts`
 
 ``` shell
 npx hardhat run ./scripts/deployVwapDynamicFeeHook.js --network sepolia
 ```
+
+The hook smart contract registers an onBeforeSwap and onAfterInitalize hook methods in order to process dynamic transaction fees. 
 
 ### onAfterInitalize
 In this method, the hook registers the newly created pool with the hook and creates a new `BrevisVwapRateProvider` contract to processes brevis proofs and compute vwaps when requested.
@@ -86,7 +88,7 @@ You can get the rate provider address using the following property on the hook c
 ## 3. Setup the prover
 The prover is responsible for processing transaction logs, aggregating volume amounts and creating the proof to submit to brevis.
 
-run the following command from `/prover`
+The following commands should be run from `/prover`
 
 To install the prover on a linux server and run with systemd:
 
@@ -94,23 +96,24 @@ To install the prover on a linux server and run with systemd:
 make deploy
 ```
 
-To stop the running prover
-
-```shell
-systemctl stop vwap-dynamic-fee-prover
-```
-
-To restart the prover
-
-```shell
-systemctl restart vwap-dynamic-fee-prover
-```
-
 To run the prover from the command line (non systemd):
 
 ```shell
 make start
 ```
+
+To stop the running prover (systemd)
+
+```shell
+systemctl stop vwap-dynamic-fee-prover
+```
+
+To restart the prover (systemd)
+
+```shell
+systemctl restart vwap-dynamic-fee-prover
+```
+
 
 ## 4. Configure the app
 Open the file `app/app.config.ts` and edit the following configurations as desired. The application supports an arbitrary number of chains to aggregate swaps from, but consult with the brevis team to ensure the source/target chainId mappings have been implemented in the system.
