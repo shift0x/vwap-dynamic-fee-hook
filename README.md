@@ -33,19 +33,22 @@ Use the following layout for hook params when deploying a new pool using this ho
 
 ``` solidity
 struct DynamicFeeHookArgs {
+    // Minimum swap fee to charge on each swap
     uint24 baseFee;
+
+    // Excess fee to charge in addition to the swap fee for swaps that move the price away from te vwap
     uint24 volatilityFee;
+
+    // The administrator for the deployed `BrevisVwapRateProvider` contract
     address admin;
+
+    // Base token for the pair
     address baseToken;
+
+    // Quote token for the pair
     address quoteToken;
 }
 ```
-
-**baseFee**: Minimum swap fee to charge on each swap
-**volatilityFee**: Excess fee to charge in addition to the swap fee for swaps that move the price away from te vwap
-**admin**: The administrator for the deployed `BrevisVwapRateProvider` contract
-**baseToken**: Base token for the pair
-**quoteToken**: Quote token for the pair
 
 ### After pool deployment
 Post pool deployment, the admin will need to configure the rate provider using the following functions
