@@ -51,7 +51,19 @@ struct DynamicFeeHookArgs {
 ```
 
 ### After pool deployment
-Post pool deployment, the admin will need to configure the rate provider using the following functions
+Post pool deployment, the admin will need to configure the rate provider using the following functions. You can get the rate provider address using the following property on the hook contract
+
+``` solidity
+    struct PoolInfo {
+        uint24 baseFee;
+        uint24 volatilityFee;
+        address baseToken;
+        address quoteToken;
+        IVwapRateProvider rateProvider;
+    }
+
+    mapping(PoolId => PoolInfo) public pools;
+```
 
 ``` solidity
     // chains which we will consider for vwap computations
